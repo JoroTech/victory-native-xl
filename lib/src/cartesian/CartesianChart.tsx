@@ -1,7 +1,7 @@
 import * as React from "react";
 import { type LayoutChangeEvent } from "react-native";
 import { Canvas, Group, rect } from "@shopify/react-native-skia";
-import { useSharedValue } from "react-native-reanimated";
+import { runOnJS, useSharedValue } from "react-native-reanimated";
 import {
   Gesture,
   GestureDetector,
@@ -46,6 +46,7 @@ type CartesianChartProps<
   axisOptions?: Partial<Omit<AxisProps<RawData, XK, YK>, "xScale" | "yScale">>;
   onChartBoundsChange?: (bounds: ChartBounds) => void;
   gestureLongPressDelay?: number;
+  trackMovement?: boolean;
 };
 
 export function CartesianChart<
@@ -65,6 +66,7 @@ export function CartesianChart<
   chartPressState,
   onChartBoundsChange,
   gestureLongPressDelay = 100,
+  trackMovement = true,
 }: CartesianChartProps<RawData, XK, YK>) {
   const [size, setSize] = React.useState({ width: 0, height: 0 });
   const [hasMeasuredLayoutSize, setHasMeasuredLayoutSize] =
@@ -241,6 +243,7 @@ export function CartesianChart<
      * As fingers move, update the shared values accordingly.
      */
     .onTouchesMove((e) => {
+      if (!trackMovement) return;
       const vals = activePressSharedValues || [];
       if (!vals.length || e.numberOfTouches === 0) return;
 
@@ -259,6 +262,7 @@ export function CartesianChart<
      * On each finger up, start to update values and "free up" the touch map.
      */
     .onTouchesUp((e) => {
+      if (!trackMovement) return;
       for (const touch of e.changedTouches) {
         const vals = activePressSharedValues || [];
 
